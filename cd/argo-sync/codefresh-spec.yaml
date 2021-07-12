@@ -18,7 +18,7 @@ spec:
         additional_flags: '--loglevel debug --timeout 1200 --grpc-web'
         wait_healthy: true
       stage: sync_staging
-    ApproveProductionSync:
+    ApproveSyncForProduction:
       type: pending-approval
       title: Waiting for Approval to Release to Production
       stage: approval
