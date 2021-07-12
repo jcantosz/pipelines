@@ -1,8 +1,8 @@
 version: '1.0'
 kind: pipeline
 metadata:
-  name: common
-  project: ci
+  name: argo-sync
+  project: cd
 spec:
   stages:
     - sync_staging
