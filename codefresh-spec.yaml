@@ -42,15 +42,13 @@ spec:
       working_directory: ${{Clone}}
       shell: bash
       commands:
-        - git show --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' >> directories.txt
+        - git show --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' | sed -e 's|\(projects/\)*$||g' >> directories.txt
         - |-
           for i in $(awk '!seen[$0]++' directories.txt); do
             if [[ $i == "codefresh-spec.yaml" ]]; then
               codefresh create pipeline -f codefresh-spec.yaml || codefresh replace -f codefresh-spec.yaml
             elif [[ -f $i/projects ]]; then 
               SPEC=$i/codefresh-spec.yaml TRIGGERS=$i/projects /merge.sh
-            elif [[ $i == *"projects"* ]]; then
-              SPEC=$i/../codefresh-spec.yaml TRIGGERS=$i /merge.sh
             else
               codefresh create pipeline -f $i/codefresh-spec.yaml || codefresh replace -f $i/codefresh-spec.yaml
             fi
