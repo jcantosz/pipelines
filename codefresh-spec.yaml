@@ -33,14 +33,26 @@ spec:
       title: Cloning Repository...
       type: git-clone
       repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
-      revision: main
+      revision: ${{CF_REVISION}}
       stage: clone
     CreateUpdatePipelines:
       title: Creating/Updating Pipelines...
       type: freestyle
       image: quay.io/codefreshplugins/pipeline-trigger-merge:1.0.0
       working_directory: ${{Clone}}
+      shell: bash
       commands:
         - git show --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' >> directories.txt
-        - for i in $(awk '!seen[$0]++' directories.txt); do SPEC=$i/codefresh-spec.yaml /merge.sh; done
+        - |-
+          for i in $(awk '!seen[$0]++' directories.txt); do
+            if [[ $i == "codefresh-spec.yaml" ]]; then
+              codefresh create pipeline -f codefresh-spec.yaml || codefresh replace -f codefresh-spec.yaml
+            elif [[ -f $i/projects ]]; then 
+              SPEC=$i/codefresh-spec.yaml TRIGGERS=$i/projects /merge.sh
+            elif [[ $i == *"projects"* ]]; then
+              SPEC=$i/../codefresh-spec.yaml TRIGGERS=$i /merge.sh
+            else
+              codefresh create pipeline -f $i/codefresh-spec.yaml || codefresh replace -f $i/codefresh-spec.yaml
+            fi
+          done
       stage: 'pipeline updates'

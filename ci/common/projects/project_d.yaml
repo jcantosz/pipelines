@@ -1,8 +1,8 @@
 spec:
   triggers:
-    - name: project_a
+    - name: project_d
       type: git
-      repo: Organization/Repository_A
+      repo: Organization/Repository_D
       events:
         - push.heads
       pullRequestAllowForkEvents: false
