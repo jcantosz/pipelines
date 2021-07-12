@@ -12,7 +12,7 @@ spec:
     - deploy
   steps:
     Clone:
-      title: Cloning GIT Repository
+      title: Cloning GIT Repository...
       type: git-clone
       arguments:
         repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
@@ -20,7 +20,7 @@ spec:
         revision: ${{CF_BRANCH}}
       stage: clone
     BuildDockerImage:
-      title: Building Docker Image
+      title: Building Docker Image...
       type: build
       working_directory: ${{Clone}}
       arguments:
@@ -28,7 +28,7 @@ spec:
         tag: ${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
       stage: build
     ExtractPullRequest:
-      title: Extract pull request and add to image
+      title: Extracting pull request and adding to Docker image...
       type: image-enricher
       fail_fast: false
       stage: enrich
@@ -42,7 +42,7 @@ spec:
           all:
             whenPullRequestTargetMainBranch: 'includes("${{CF_PULL_REQUEST_TARGET}}", "main") == true'
     ExtractJIRAIssue:
-      title: Extract issue and add to image
+      title: Extracting JIRA issue and adding to Docker image...
       type: jira-issue-extractor
       fail_fast: false
       stage: enrich
@@ -57,6 +57,7 @@ spec:
           all:
             whenPullRequestTargetMainBranch: 'includes("${{CF_PULL_REQUEST_TARGET}}", "main") == true'
     PullRequestScan:
+      title: Scanning Pull Request...
       type: sonar-scanner-cli
       stage: test
       arguments:
@@ -77,7 +78,7 @@ spec:
           all:
             whenPullRequestTargetMainBranch: 'includes("${{CF_PULL_REQUEST_TARGET}}", "main") == true'
     RunArgoCDSync:
-      title: Running ArgoCD Sync Pipeline
+      title: Running ArgoCD Sync Pipeline...
       stage: deploy
       type: codefresh-run
       arguments:

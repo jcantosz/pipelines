@@ -10,7 +10,7 @@ spec:
     - sync_production
   steps:
     ArgoSyncStaging:
-      title: Sync Staging ArgoCD App
+      title: Syncing Staging ArgoCD App...
       type: argocd-sync
       arguments:
         context: argocd-staging
@@ -20,13 +20,13 @@ spec:
       stage: sync_staging
     ApproveProductionSync:
       type: pending-approval
-      title: Approve Release to Production
+      title: Waiting for Approval to Release to Production
       stage: approval
       timeout:
         duration: 24
         finalState: denied
     ArgoSyncProduction:
-      title: Sync Production ArgoCD App
+      title: Syncing Production ArgoCD App...
       type: argocd-sync
       arguments:
         context: argocd-production
