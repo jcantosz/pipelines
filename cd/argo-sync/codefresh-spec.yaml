@@ -15,7 +15,7 @@ spec:
       arguments:
         context: argocd-staging
         app_name: ${{APP_NAME}}
-        additional_flags: '--loglevel debug --timeout 1200 --grpc-web'
+        additional_flags: '--timeout 1200 --grpc-web'
         wait_healthy: true
       stage: sync_staging
     ApproveSyncForProduction:
@@ -31,6 +31,6 @@ spec:
       arguments:
         context: argocd-production
         app_name: ${{APP_NAME}}
-        additional_flags: '--loglevel debug --timeout 1200 --grpc-web'
+        additional_flags: '--timeout 1200 --grpc-web'
         wait_healthy: true
       stage: sync_production
