@@ -1,0 +1,18 @@
+spec:
+  triggers:
+    - name: project_i
+      type: git
+      repo: Organization/Repository_I
+      events:
+        - push.heads
+      pullRequestAllowForkEvents: false
+      commentRegex: /.*/gi
+      branchRegex: /.*/gi
+      branchRegexInput: regex
+      provider: github
+      options:
+        noCache: false
+        noCfCache: false
+        resetVolume: false
+      context: github
+      contexts: [ ]
