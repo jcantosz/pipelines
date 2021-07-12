@@ -82,7 +82,7 @@ spec:
       stage: sync
       type: codefresh-run
       arguments:
-        PIPELINE_ID: argo-sync
+        PIPELINE_ID: cd/argo-sync
         VARIABLE:
           - APP_NAME=${{CF_REPO_NAME}}
         DETACH: true
