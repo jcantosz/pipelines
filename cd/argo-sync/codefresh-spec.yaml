@@ -1,0 +1,36 @@
+version: '1.0'
+kind: pipeline
+metadata:
+  name: common
+  project: ci
+spec:
+  stages:
+    - sync_staging
+    - approval
+    - sync_production
+  steps:
+    ArgoSyncStaging:
+      title: Sync Staging ArgoCD App
+      type: argocd-sync
+      arguments:
+        context: argocd-staging
+        app_name: ${{APP_NAME}}
+        additional_flags: '--loglevel debug --timeout 1200 --grpc-web'
+        wait_healthy: true
+      stage: sync_staging
+    ApproveProductionRelease:
+      type: pending-approval
+      title: Approve Release to Production
+      stage: approval
+      timeout:
+        duration: 24
+        finalState: denied
+    ArgoSyncProduction:
+      title: Sync Production ArgoCD App
+      type: argocd-sync
+      arguments:
+        context: argocd-production
+        app_name: ${{APP_NAME}}
+        additional_flags: '--loglevel debug --timeout 1200 --grpc-web'
+        wait_healthy: true
+      stage: sync_production

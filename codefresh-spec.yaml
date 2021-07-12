@@ -2,43 +2,45 @@
 # Update this pipeline specification with the correct repository and use Codefresh CLI for initial creation of creator
 # Open a PR against the main branch and merge to see Codefresh pipelines updated.
 
-
-# More examples of Codefresh YAML can be found at
-# https://codefresh.io/docs/docs/yaml-examples/examples/
-
-version: "1.0"
+version: '1.0'
 kind: pipeline
 metadata:
   name: pipeline-creator
-
-# Stages can help you organize your steps in stages
 spec:
   stages:
-    - "clone"
-    - "create"
-
+    - clone
+    - 'pipeline updates'
+  triggers:
+    - name: pipelines
+      type: git
+      repo: salesdemocf/pipelines
+      events:
+        - push.heads
+      pullRequestAllowForkEvents: false
+      commentRegex: /.*/gi
+      branchRegex: /master/gi
+      branchRegexInput: regex
+      provider: github
+      options:
+        noCache: false
+        noCfCache: false
+        resetVolume: false
+      context: github
+      contexts: []
+      variables: []
   steps:
-    clone:
-      title: "Cloning repository"
-      type: "git-clone"
-      repo: "https://github.com/codefresh-io/cli/"
-      revision: "master"
-      stage: "clone"
-
-    build:
-      title: "Building Docker image"
-      type: "build"
-      image_name: "codefresh-io/cli"
-      working_directory: "${{clone}}"
-      tag: "latest"
-      dockerfile: "Dockerfile"
-      stage: "build"
-
-    test:
-      title: "Running test"
-      type: "freestyle" # Run any command
-      image: "codefresh-io/cli" # The image in which command will be executed
-      working_directory: "${{clone}}" # Running command where code cloned
+    Clone:
+      title: Cloning Repository...
+      type: git-clone
+      repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+      revision: main
+      stage: clone
+    CreateUpdatePipelines:
+      title: Creating/Updating Pipelines...
+      type: freestyle
+      image: quay.io/codefreshplugins/pipeline-trigger-merge:1.0.0
+      working_directory: ${{Clone}}
       commands:
-        - "ls"
-      stage: "test"
+        - git show --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' >> directories.txt
+        - for i in $(awk '!seen[$0]++' directories.txt); do SPEC=$i/codefresh-spec.yaml /merge.sh; done
+      stage: 'pipeline updates'
