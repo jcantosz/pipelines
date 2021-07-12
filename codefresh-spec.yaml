@@ -42,7 +42,7 @@ spec:
       working_directory: ${{Clone}}
       shell: bash
       commands:
-        - git log -m -1 --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' | sed -e 's|\(projects\)*$||g' >> directories.txt
+        - git log -m -1 --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' | sed -e 's|\(/projects\)*$||g' >> directories.txt
         - |-
           for i in $(awk '!seen[$0]++' directories.txt); do
             if [[ $i == "codefresh-spec.yaml" ]]; then
