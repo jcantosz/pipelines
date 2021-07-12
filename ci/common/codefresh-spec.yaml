@@ -9,7 +9,7 @@ spec:
     - build
     - enrich
     - test
-    - deploy
+    - sync
   steps:
     Clone:
       title: Cloning GIT Repository...
@@ -79,7 +79,7 @@ spec:
             whenPullRequestTargetMainBranch: 'includes("${{CF_PULL_REQUEST_TARGET}}", "main") == true'
     RunArgoCDSync:
       title: Running ArgoCD Sync Pipeline...
-      stage: deploy
+      stage: sync
       type: codefresh-run
       arguments:
         PIPELINE_ID: argo-sync
