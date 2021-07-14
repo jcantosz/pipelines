@@ -1,0 +1,92 @@
+version: '1.0'
+kind: pipeline
+metadata:
+  name: nodejs
+  project: ci
+spec:
+  stages:
+    - clone
+    - build
+    - enrich
+    - test
+    - sync
+  steps:
+    Clone:
+      title: Cloning GIT Repository...
+      type: git-clone
+      arguments:
+        repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+        git: github
+        revision: ${{CF_BRANCH}}
+      stage: clone
+    BuildDockerImage:
+      title: Building Docker Image...
+      type: build
+      working_directory: ${{Clone}}
+      arguments:
+        image_name: ${{CF_REPO_NAME}}
+        tag: ${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
+      stage: build
+    ExtractPullRequest:
+      title: Extracting pull request and adding to Docker image...
+      type: image-enricher
+      fail_fast: false
+      stage: enrich
+      arguments:
+        IMAGE: ${{CF_REPO_NAME}}:${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
+        BRANCH: ${{CF_BRANCH}}
+        REPO: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+        GIT_PROVIDER_NAME: github
+      when:
+        condition:
+          all:
+            whenPullRequestTargetMainBranch: 'includes("${{CF_PULL_REQUEST_TARGET}}", "main") == true'
+    ExtractJIRAIssue:
+      title: Extracting JIRA issue and adding to Docker image...
+      type: jira-issue-extractor
+      fail_fast: false
+      stage: enrich
+      arguments:
+        IMAGE: ${{CF_REPO_NAME}}:${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
+        JIRA_PROJECT_PREFIX: SA
+        JIRA_HOST: codefresh-io.atlassian.net
+        MESSAGE: ${{CF_BRANCH_VERSION_NORMALIZED}}
+        JIRA_CONTEXT: jira-p
+      when:
+        condition:
+          all:
+            whenPullRequestTargetMainBranch: 'includes("${{CF_PULL_REQUEST_TARGET}}", "main") == true'
+    PullRequestScan:
+      title: Scanning Pull Request...
+      type: sonar-scanner-cli
+      stage: test
+      arguments:
+        SONAR_HOST_URL: 'https://sonarcloud.io'
+        SONAR_ANALYSIS_PARAMETERS:
+          - sonar.pullrequest.key=${{CF_PULL_REQUEST_NUMBER}}
+          - sonar.pullrequest.branch=${{CF_BRANCH}}
+          - sonar.pullrequest.base=${{CF_PULL_REQUEST_TARGET}}
+          - sonar.organization=${{CF_REPO_OWNER}}
+          - sonar.projectKey=${{CF_REPO_OWNER}}_${{CF_REPO_NAME}}
+          - sonar.projectBaseDir=/codefresh/volume/${{CF_REPO_NAME}}
+          - sonar.login=${{SONAR_LOGIN}}
+          - sonar.scm.revision=${{CF_REVISION}}
+          - sonar.sources=.
+          - sonar.sourceEncoding=UTF-8
+      when:
+        condition:
+          all:
+            whenPullRequestTargetMainBranch: 'includes("${{CF_PULL_REQUEST_TARGET}}", "main") == true'
+    RunArgoCDSync:
+      title: Running ArgoCD Sync Pipeline...
+      stage: sync
+      type: codefresh-run
+      arguments:
+        PIPELINE_ID: cd/argo-sync
+        VARIABLE:
+          - APP_NAME=${{CF_REPO_NAME}}
+        DETACH: true
+      when:
+        branch:
+          only:
+            - main
