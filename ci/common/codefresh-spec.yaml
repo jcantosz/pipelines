@@ -1,8 +1,7 @@
 version: '1.0'
 kind: pipeline
 metadata:
-  name: common
-  project: ci
+  name: jesse-step-test/common
 spec:
   stages:
     - clone

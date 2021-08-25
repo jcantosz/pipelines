@@ -1,8 +1,7 @@
 version: '1.0'
 kind: pipeline
 metadata:
-  name: nodejs
-  project: ci
+  name: jesse-step-test/nodejs
 spec:
   stages:
     - clone
