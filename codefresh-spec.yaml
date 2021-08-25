@@ -5,7 +5,7 @@
 version: '1.0'
 kind: pipeline
 metadata:
-  name: pipeline-creator
+  name: jesse-step-test/pipeline-creator
 spec:
   stages:
     - clone
@@ -13,7 +13,7 @@ spec:
   triggers:
     - name: pipelines
       type: git
-      repo: salesdemocf/pipelines
+      repo: jcantosz/pipelines
       events:
         - push.heads
       pullRequestAllowForkEvents: false
@@ -25,7 +25,7 @@ spec:
         noCache: false
         noCfCache: false
         resetVolume: false
-      context: github
+      context: github-jesse
       contexts: []
       variables: []
   steps:
@@ -35,22 +35,32 @@ spec:
       repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
       revision: ${{CF_REVISION}}
       stage: clone
-    CreateUpdatePipelines:
-      title: Creating/Updating Pipelines...
-      type: freestyle
-      image: quay.io/codefreshplugins/pipeline-trigger-merge:1.0.0
-      working_directory: ${{Clone}}
-      shell: bash
-      commands:
-        - git log -m -1 --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' | sed -e 's|\(/projects\)*$||g' >> directories.txt
-        - |-
-          for i in $(awk '!seen[$0]++' directories.txt); do
-            if [[ $i == "codefresh-spec.yaml" ]]; then
-              codefresh create pipeline -f codefresh-spec.yaml || codefresh replace -f codefresh-spec.yaml
-            elif [[ -d $i/projects ]]; then 
-              SPEC=$i/codefresh-spec.yaml TRIGGERS=$i/projects /merge.sh
-            else
-              codefresh create pipeline -f $i/codefresh-spec.yaml || codefresh replace -f $i/codefresh-spec.yaml
-            fi
-          done
-      stage: 'pipeline updates'
+      git: github-jesse
+
+    MergeTriggersIntoPipelines:
+      title: Merge the triggers into the pipeline spec(s)
+      type: codefreshdemo/pipeline-trigger-merge
+      arguments:
+        SPEC: codefresh-spec.yaml
+        ONLY_CHANGED: true
+        TRIGGERS_SUBDIR: projects
+
+    # CreateUpdatePipelines:
+    #   title: Creating/Updating Pipelines...
+    #   type: freestyle
+    #   image: quay.io/codefreshplugins/pipeline-trigger-merge:1.0.0
+    #   working_directory: ${{Clone}}
+    #   shell: bash
+    #   commands:
+    #     - git log -m -1 --pretty="" --name-only | cat | sed 's|\(.*\)/.*|\1|' | sed -e 's|\(/projects\)*$||g' >> directories.txt
+    #     - |-
+    #       for i in $(awk '!seen[$0]++' directories.txt); do
+    #         if [[ $i == "codefresh-spec.yaml" ]]; then
+    #           codefresh create pipeline -f codefresh-spec.yaml || codefresh replace -f codefresh-spec.yaml
+    #         elif [[ -d $i/projects ]]; then 
+    #           SPEC=$i/codefresh-spec.yaml TRIGGERS=$i/projects /merge.sh
+    #         else
+    #           codefresh create pipeline -f $i/codefresh-spec.yaml || codefresh replace -f $i/codefresh-spec.yaml
+    #         fi
+    #       done
+    #   stage: 'pipeline updates'
