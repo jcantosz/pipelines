@@ -47,6 +47,24 @@ spec:
         ONLY_CHANGED: true
         TRIGGERS_SUBDIR: projects
 
+    # Make sure the old way still works
+    MergeTriggersIntoPipelines2:
+      title: Merge the triggers into the pipeline spec(s)
+      type: codefreshdemo/pipeline-trigger-merge
+      working_directory: ${{Clone}}
+      stage: 'pipeline updates'
+      scale:
+        root:
+          arguments:
+            SPEC: codefresh-spec.yaml
+        nodejs:
+          arguments:
+            SPEC: ci/nodejs/codefresh-spec.yaml
+        common:
+          arguments:
+            SPEC: ci/common/codefresh-spec.yaml
+            triggers: ci/commo/projects
+
     # CreateUpdatePipelines:
     #   title: Creating/Updating Pipelines...
     #   type: freestyle
@@ -59,7 +77,7 @@ spec:
     #       for i in $(awk '!seen[$0]++' directories.txt); do
     #         if [[ $i == "codefresh-spec.yaml" ]]; then
     #           codefresh create pipeline -f codefresh-spec.yaml || codefresh replace -f codefresh-spec.yaml
-    #         elif [[ -d $i/projects ]]; then 
+    #         elif [[ -d $i/projects ]]; then
     #           SPEC=$i/codefresh-spec.yaml TRIGGERS=$i/projects /merge.sh
     #         else
     #           codefresh create pipeline -f $i/codefresh-spec.yaml || codefresh replace -f $i/codefresh-spec.yaml
