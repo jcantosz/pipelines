@@ -40,6 +40,7 @@ spec:
     MergeTriggersIntoPipelines:
       title: Merge the triggers into the pipeline spec(s)
       type: codefreshdemo/pipeline-trigger-merge
+      working_directory: ${{Clone}}
       arguments:
         SPEC: codefresh-spec.yaml
         ONLY_CHANGED: true
