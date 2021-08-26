@@ -43,7 +43,7 @@ spec:
       working_directory: "${{Clone}}" # Running command where code cloned
       # Check the file changes from the last commit, fail if only .version has changed
       commands:
-        - git --no-pager log -m -1 --pretty="" --name-only | grep -v '^codefresh-spec.yaml$'
+        - git --no-pager log -m -1 --pretty="" --name-only | grep -v '^codefresh-spec\.yaml$'
         - >-
           if [ $? -ne 0 ]; then echo "only .version file has changed, exiting"; exit 1; fi
 

@@ -9,3 +9,4 @@ If any new projects are added in the projects folder they will reuse the common 
 There is also a cd pipelines `argo-sync` which is called upon from `common` when the timing is right to run ArgoCD Sync for a project.
 
 For more in-depth explanation please talk to Solutions Architect or Customer Success teams.
+
