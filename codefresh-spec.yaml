@@ -36,20 +36,20 @@ spec:
       revision: ${{CF_REVISION}}
       stage: clone
       git: github-jesse
-    CheckFilesChanged:
-      title: "Check Files Changed"
-      image: "codefresh/cli" # The image in which command will be executed
-      stage: clone
-      working_directory: "${{Clone}}" # Running command where code cloned
-      # Check the file changes from the last commit, fail if only .version has changed
-      commands:
-        - git --no-pager log -m -1 --pretty="" --name-only | grep -v '^codefresh-spec\.yaml$'
-        - >-
-          if [ $? -ne 0 ]; then echo "only .version file has changed, exiting"; exit 1; fi
+    # CheckFilesChanged:
+    #   title: "Check Files Changed"
+    #   image: "codefresh/cli" # The image in which command will be executed
+    #   stage: clone
+    #   working_directory: "${{Clone}}" # Running command where code cloned
+    #   # Check the file changes from the last commit, fail if only .version has changed
+    #   commands:
+    #     - git --no-pager log -m -1 --pretty="" --name-only | grep -v '^codefresh-spec\.yaml$'
+    #     - >-
+    #       if [ $? -ne 0 ]; then echo "only .version file has changed, exiting"; exit 1; fi
 
     MergeTriggersIntoPipelines:
       title: Merge the triggers into the pipeline spec(s)
-      type: codefreshdemo/pipeline-trigger-merge
+      type: pipeline-trigger-merge
       working_directory: ${{Clone}}
       stage: 'pipeline updates'
       arguments:
@@ -60,7 +60,7 @@ spec:
     # Make sure the old way still works
     MergeTriggersIntoPipelines2:
       title: Merge the triggers into the pipeline spec(s)
-      type: codefreshdemo/pipeline-trigger-merge
+      type: pipeline-trigger-merge
       working_directory: ${{Clone}}
       stage: 'pipeline updates'
       scale:
